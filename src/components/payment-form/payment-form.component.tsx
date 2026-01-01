@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { useSelector } from 'react-redux';
 
@@ -16,7 +16,7 @@ const PaymentForm = () => {
   const currentUser = useSelector(selectCurrentUser);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
     
-  const paymentHandler = async (e) => {
+  const paymentHandler = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("Handler activated!");
 
@@ -40,9 +40,13 @@ const PaymentForm = () => {
 
     console.log(client_secret);
 
+    const cardDetails = elements.getElement(CardElement);
+
+    if (cardDetails === null) return;
+
     const paymentResult = await stripe.confirmCardPayment(client_secret, {
       payment_method: {
-        card: elements.getElement(CardElement),
+        card: cardDetails,
         billing_details: {
           name: currentUser ? currentUser.displayName : "Guest",
         }
@@ -62,7 +66,7 @@ const PaymentForm = () => {
 
   return (
     <PaymentFormContainer>
-      <FormContainer unSubmit={paymentHandler}>
+      <FormContainer onSubmit={paymentHandler}>
         <h2>Credit Card Payment: </h2>
         <CardElement />
         <PaymentButton 

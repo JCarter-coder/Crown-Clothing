@@ -2,6 +2,7 @@ require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 exports.handler = async (event) => {
+  console.log("Inside Netlify fetch handler")
   try {
     const { amount } = JSON.parse(event.body);
 

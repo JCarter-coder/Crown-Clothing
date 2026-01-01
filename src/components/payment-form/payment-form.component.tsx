@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { StripeCardElement } from '@stripe/stripe-js';
+import { StripeCardElement, PaymentIntent } from '@stripe/stripe-js';
 import { useSelector } from 'react-redux';
 
 import { selectCartTotal } from '../../store/cart/cart.selector';
@@ -35,7 +35,7 @@ const PaymentForm = () => {
 
     setIsProcessingPayment(true);
 
-    const response = await fetch('/.netlify/functions/create-payment-intent', {
+    const response: PaymentIntent = await fetch('/.netlify/functions/create-payment-intent', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,7 +44,7 @@ const PaymentForm = () => {
     }).then((res) => res.json());
 
     const { 
-      paymentIntent: { client_secret }
+     client_secret 
     } = response;
 
     //console.log(client_secret);
@@ -52,6 +52,7 @@ const PaymentForm = () => {
     const cardDetails = elements.getElement(CardElement);
 
     if (!ifValidCardElement(cardDetails)) return;
+    if (!client_secret) return;
 
     const paymentResult = await stripe.confirmCardPayment(client_secret, {
       payment_method: {
